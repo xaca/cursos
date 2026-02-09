@@ -1,0 +1,64 @@
+---
+import BlogLayout from '../../../../layouts/BlogLayout.astro';
+import PostCard from '../../../../components/blog/PostCard.astro';
+import BlogArchive from '../../../../components/blog/BlogArchive.astro';
+import { getPostsByYearMonth, getArchiveData } from '../../../../utils/blog';
+
+const monthNames: Record<number, string> = {
+  1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
+  7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre',
+};
+
+export async function getStaticPaths() {
+  const posts = await (await import('../../../../utils/blog')).getAllPosts();
+  const combos = new Set<string>();
+  for (const post of posts) {
+    const y = post.data.pubDate.getFullYear();
+    const m = post.data.pubDate.getMonth() + 1;
+    combos.add(`${y}-${String(m).padStart(2, '0')}`);
+  }
+  return Array.from(combos).map((combo) => {
+    const [year, month] = combo.split('-');
+    return { params: { year, month } };
+  });
+}
+
+const { year, month } = Astro.params;
+const yearNum = parseInt(year ?? '0', 10);
+const monthNum = parseInt(month ?? '0', 10);
+const posts = await getPostsByYearMonth(yearNum, monthNum);
+const archive = await getArchiveData();
+const monthName = monthNames[monthNum] ?? month;
+---
+<BlogLayout title={`Blog ${monthName} ${yearNum} | holamundo.co`} description={`Artículos del blog publicados en ${monthName} de ${yearNum}.`}>
+  <header class="mb-12 sm:mb-16">
+    <h1 class="font-serif text-4xl sm:text-5xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+      Blog — {monthName} {yearNum}
+    </h1>
+    <p class="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-3xl">
+      {posts.length} artículo{posts.length !== 1 ? 's' : ''} publicados en {monthName} de {yearNum}.
+    </p>
+  </header>
+  <div class="flex flex-col lg:flex-row gap-12">
+    <div class="flex-1 min-w-0">
+      <div class="grid gap-6 sm:gap-8 md:grid-cols-2">
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <PostCard
+              slug={post.slug}
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              tags={post.data.tags}
+            />
+          ))
+        ) : (
+          <p class="text-slate-600 dark:text-slate-400 col-span-2">No hay artículos en este período.</p>
+        )}
+      </div>
+    </div>
+    <div class="lg:w-64 flex-shrink-0">
+      <BlogArchive archive={archive} currentYear={yearNum} currentMonth={monthNum} />
+    </div>
+  </div>
+</BlogLayout>

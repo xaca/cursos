@@ -1,0 +1,46 @@
+---
+interface Props {
+  archive: { year: number; count: number; months: [number, number][] }[];
+  currentYear?: number;
+  currentMonth?: number;
+}
+const { archive, currentYear, currentMonth } = Astro.props;
+
+const monthNames: Record<number, string> = {
+  1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
+  7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre',
+};
+---
+<aside class="mb-12 p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+  <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Archivo por año</h2>
+  <a
+    href="/blog"
+    class={`block mb-3 font-medium transition-colors ${!currentYear ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'}`}
+  >
+    Todos los artículos
+  </a>
+  <ul class="space-y-3">
+    {archive.map(({ year, count, months }) => (
+      <li>
+        <a
+          href={`/blog/archive/${year}`}
+          class={`block font-medium transition-colors ${currentYear === year && !currentMonth ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'}`}
+        >
+          {year} <span class="text-slate-500 dark:text-slate-400 font-normal">({count})</span>
+        </a>
+        <ul class="mt-1 ml-3 space-y-1">
+          {months.map(([month, monthCount]) => (
+            <li>
+              <a
+                href={`/blog/archive/${year}/${String(month).padStart(2, '0')}`}
+                class={`block text-sm transition-colors ${currentYear === year && currentMonth === month ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'}`}
+              >
+                {monthNames[month]} ({monthCount})
+              </a>
+            </li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
+</aside>

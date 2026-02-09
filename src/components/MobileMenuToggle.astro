@@ -1,0 +1,144 @@
+---
+// Custom hamburger menu with cleaner icons
+---
+
+<starlight-menu-button class="print:hidden" aria-expanded="false">
+  <button
+    aria-expanded="false"
+    aria-label={Astro.locals.t('menuButton.accessibleLabel')}
+    aria-controls="starlight__sidebar"
+    class="menu-btn sl-flex md:sl-hidden"
+  >
+    <!-- Hamburger icon (3 horizontal lines) -->
+    <svg class="open-menu" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z" />
+    </svg>
+    <!-- Close icon (X) -->
+    <svg class="close-menu" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z" />
+    </svg>
+  </button>
+</starlight-menu-button>
+
+<script>
+  class StarlightMenuButton extends HTMLElement {
+    btn = this.querySelector('button')!;
+
+    constructor() {
+      super();
+      this.btn.addEventListener('click', () => this.toggleExpanded());
+      const parentNav = this.closest('nav');
+      if (parentNav) {
+        parentNav.addEventListener('keyup', (e) => this.closeOnEscape(e));
+      }
+    }
+
+    setExpanded(expanded: boolean) {
+      this.setAttribute('aria-expanded', String(expanded));
+      document.body.toggleAttribute('data-mobile-menu-expanded', expanded);
+    }
+
+    toggleExpanded() {
+      this.setExpanded(this.getAttribute('aria-expanded') !== 'true');
+    }
+
+    closeOnEscape(e: KeyboardEvent) {
+      if (e.code === 'Escape') {
+        this.setExpanded(false);
+        this.btn.focus();
+      }
+    }
+  }
+
+  if (!customElements.get('starlight-menu-button')) {
+    customElements.define('starlight-menu-button', StarlightMenuButton);
+  }
+</script>
+
+<style>
+  @layer starlight.core {
+    .menu-btn {
+      position: fixed;
+      top: calc((var(--sl-nav-height) - var(--sl-menu-button-size)) / 2);
+      inset-inline-end: var(--sl-nav-pad-x);
+      z-index: var(--sl-z-index-navbar);
+      border: 0;
+      border-radius: 50%;
+      width: var(--sl-menu-button-size);
+      height: var(--sl-menu-button-size);
+      padding: 0;
+      background-color: var(--sl-color-white);
+      color: var(--sl-color-black);
+      box-shadow: var(--sl-shadow-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    [aria-expanded='true'] .menu-btn {
+      background-color: var(--sl-color-gray-2);
+      box-shadow: none;
+    }
+
+    /* Hide close icon when menu is closed - use host selector for reliability */
+    starlight-menu-button:not([aria-expanded='true']) .menu-btn .close-menu {
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      position: absolute !important;
+    }
+
+    /* Hide hamburger when menu is open */
+    starlight-menu-button[aria-expanded='true'] .menu-btn .open-menu {
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      position: absolute !important;
+    }
+
+    /* Show correct icon in each state */
+    starlight-menu-button:not([aria-expanded='true']) .menu-btn .open-menu {
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    starlight-menu-button[aria-expanded='true'] .menu-btn .close-menu {
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    .menu-btn .open-menu,
+    .menu-btn .close-menu {
+      position: absolute;
+      width: 1.25rem;
+      height: 1.25rem;
+      inset: 0;
+      margin: auto;
+      transition: opacity 0.15s ease;
+    }
+
+    :global([data-theme='light']) .menu-btn {
+      background-color: var(--sl-color-black);
+      color: var(--sl-color-white);
+    }
+
+    :global([data-theme='light']) [aria-expanded='true'] .menu-btn {
+      background-color: var(--sl-color-gray-5);
+    }
+  }
+</style>
+
+<style is:global>
+  @layer starlight.core {
+    [data-mobile-menu-expanded] {
+      overflow: hidden;
+    }
+
+    @media (min-width: 50rem) {
+      [data-mobile-menu-expanded] {
+        overflow: auto;
+      }
+    }
+  }
+</style>

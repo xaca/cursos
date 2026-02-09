@@ -1,0 +1,111 @@
+/* Fix mobile "On this page" TOC overlapping with main content */
+@layer starlight.overrides {
+  /* Raise mobile TOC above main content (default is 4, navbar is 10) */
+  :root {
+    --sl-z-index-toc: 15;
+  }
+}
+
+/* Fix mobile TOC "Overview" duplicate/overlap - improve UX */
+@layer starlight.overrides {
+  /* Hide duplicate current heading in summary when dropdown is open */
+  mobile-starlight-toc details[open] .display-current {
+    display: none;
+  }
+
+  /* Clear separation between summary and dropdown - prevent overlap */
+  mobile-starlight-toc .dropdown {
+    margin-top: 0;
+    border-top: 1px solid var(--sl-color-gray-5);
+  }
+
+  /* Summary row: cleaner layout when closed */
+  mobile-starlight-toc summary {
+    gap: 0.75rem;
+    min-height: var(--sl-mobile-toc-height);
+  }
+
+  mobile-starlight-toc .display-current {
+    min-width: 0; /* Allow ellipsis to work */
+    flex: 1;
+  }
+
+  /* Better contrast for selected TOC item in mobile dropdown */
+  mobile-starlight-toc .dropdown a[aria-current='true'] {
+    background-color: color-mix(in srgb, var(--sl-color-accent) 20%, transparent);
+    color: var(--sl-color-white);
+  }
+
+  /* Hierarchy: indent sub-items, smaller font for nested headings */
+  mobile-starlight-toc .dropdown ul ul a {
+    padding-inline-start: 2rem;
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-2);
+  }
+  mobile-starlight-toc .dropdown ul ul ul a {
+    padding-inline-start: 2.75rem;
+    font-size: var(--sl-text-2xs);
+  }
+}
+
+/* Theme selector - prevent text clipping, ensure adequate width for translations */
+@layer starlight.overrides {
+  starlight-theme-select label {
+    --sl-select-width: 9.5em;
+  }
+}
+
+/* Fix hamburger/close icon overlap - ensure only one shows at a time */
+@layer starlight.overrides {
+  starlight-menu-button:not([aria-expanded='true']) .close-menu {
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+  starlight-menu-button[aria-expanded='true'] .open-menu {
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+}
+
+/* Fix selected sidebar item contrast - dark bg + white text for readability */
+@layer starlight.overrides {
+  .sidebar-content a[aria-current='page'],
+  .sidebar-content a[aria-current='page']:hover,
+  .sidebar-content a[aria-current='page']:focus {
+    color: var(--sl-color-white) !important;
+    background-color: var(--sl-color-accent) !important;
+  }
+}
+
+/* Sidebar hierarchy - stronger section headers, clearer indentation */
+@layer starlight.overrides {
+  /* Section headers (group labels) - bolder, more prominent */
+  .sidebar-content summary .group-label .large,
+  .sidebar-content .top-level > li > a.large {
+    font-size: var(--sl-text-base);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  /* Sub-items - smaller, indented */
+  .sidebar-content ul ul li {
+    margin-inline-start: 0.75rem;
+    padding-inline-start: 0.75rem;
+    border-inline-start-width: 2px;
+  }
+
+  .sidebar-content ul ul a {
+    font-size: var(--sl-text-sm);
+    font-weight: 400;
+    padding-block: 0.25rem;
+  }
+
+  /* More compact on mobile */
+  @media (max-width: 50rem) {
+    .sidebar-content summary,
+    .sidebar-content .top-level > li > a {
+      padding-block: 0.35rem;
+    }
+  }
+}
+

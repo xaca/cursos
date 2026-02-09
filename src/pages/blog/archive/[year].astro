@@ -1,0 +1,49 @@
+---
+import BlogLayout from '../../../layouts/BlogLayout.astro';
+import PostCard from '../../../components/blog/PostCard.astro';
+import BlogArchive from '../../../components/blog/BlogArchive.astro';
+import { getPostsByYear, getArchiveData } from '../../../utils/blog';
+
+export async function getStaticPaths() {
+  const { getAvailableYears } = await import('../../../utils/blog');
+  const years = await getAvailableYears();
+  return years.map((year) => ({ params: { year: String(year) } }));
+}
+
+const { year } = Astro.params;
+const yearNum = parseInt(year ?? '0', 10);
+const posts = await getPostsByYear(yearNum);
+const archive = await getArchiveData();
+---
+<BlogLayout title={`Blog ${yearNum} | holamundo.co`} description={`Artículos del blog publicados en ${yearNum}.`}>
+  <header class="mb-12 sm:mb-16">
+    <h1 class="font-serif text-4xl sm:text-5xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+      Blog — {yearNum}
+    </h1>
+    <p class="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-3xl">
+      {posts.length} artículo{posts.length !== 1 ? 's' : ''} publicados en {yearNum}.
+    </p>
+  </header>
+  <div class="flex flex-col lg:flex-row gap-12">
+    <div class="flex-1 min-w-0">
+      <div class="grid gap-6 sm:gap-8 md:grid-cols-2">
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <PostCard
+              slug={post.slug}
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              tags={post.data.tags}
+            />
+          ))
+        ) : (
+          <p class="text-slate-600 dark:text-slate-400 col-span-2">No hay artículos en este año.</p>
+        )}
+      </div>
+    </div>
+    <div class="lg:w-64 flex-shrink-0">
+      <BlogArchive archive={archive} currentYear={yearNum} />
+    </div>
+  </div>
+</BlogLayout>

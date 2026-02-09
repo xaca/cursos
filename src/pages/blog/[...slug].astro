@@ -1,0 +1,40 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import TagList from '../../components/blog/TagList.astro';
+import { getCollection } from 'astro:content';
+import { type CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+<BlogLayout title={`${post.data.title} | holamundo.co`} description={post.data.description}>
+  <a href="/blog" class="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 mb-8 transition-colors">
+    <span aria-hidden="true">←</span>
+    Volver al blog
+  </a>
+  <article class="prose-blog w-full">
+    <header class="mb-10">
+      <h1 class="font-serif text-3xl sm:text-4xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+        {post.data.title}
+      </h1>
+      <time datetime={post.data.pubDate.toISOString()} class="block mt-3 text-sm text-slate-500 dark:text-slate-400">
+        {post.data.pubDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </time>
+      {post.data.tags && post.data.tags.length > 0 && (
+        <TagList tags={post.data.tags} />
+      )}
+    </header>
+    <Content />
+  </article>
+</BlogLayout>
